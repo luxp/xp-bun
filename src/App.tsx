@@ -1,5 +1,5 @@
 import "./index.css";
-import { callApi } from "./api/call-api";
+import { callApi } from "./api/call";
 
 export function App() {
   return (

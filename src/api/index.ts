@@ -16,5 +16,5 @@ export async function handler(action: string, req: Request) {
       { status: 404 }
     );
   }
-  return handler({ body: await req.json() });
+  return handler({ body: await req.json(), formData: await req.formData() });
 }

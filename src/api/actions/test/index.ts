@@ -5,6 +5,7 @@ import schema from "./schema";
 console.log(sqlite);
 export default async function handler(params: {
   body: z.infer<typeof schema.inputSchema>;
+  formData: FormData;
 }) {
   const { name } = params.body;
   return schema.outputSchema.parse({ message: `Hello, ${name}!` });
