@@ -9,6 +9,9 @@
     "start": "NODE_ENV=production bun src/index.tsx"
   },
   "dependencies": {
+    "@types/fluent-ffmpeg": "^2.1.27",
+    "canvas": "^3.2.0",
+    "fluent-ffmpeg": "^2.1.3",
     "react": "^19",
     "react-dom": "^19",
     "zod": "^4.1.12"
