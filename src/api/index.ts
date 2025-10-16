@@ -1,9 +1,8 @@
-import test from "./actions/test";
-import test2 from "./actions/test2";
-
+import saveFireworks from "./actions/fireworks/save/index";
+import xpdb from "./actions/xpdb/index";
 const actionMap = {
-  test,
-  test2,
+  saveFireworks,
+  xpdb,
 };
 
 export async function handler(action: string, req: Request) {
@@ -16,5 +15,5 @@ export async function handler(action: string, req: Request) {
       { status: 404 }
     );
   }
-  return handler({ body: await req.json(), formData: await req.formData() });
+  return handler({ body: await req.json() });
 }

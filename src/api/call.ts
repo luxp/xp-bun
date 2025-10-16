@@ -1,10 +1,10 @@
 import * as z from "zod";
-import test from "./actions/test/schema";
-import test2 from "./actions/test2/schema";
+import saveFireworks from "./actions/fireworks/save/schema";
+import xpdb from "./actions/xpdb/schema";
 
 const actionMap = {
-  test,
-  test2,
+  saveFireworks,
+  xpdb,
 };
 
 export function callApi<T extends keyof typeof actionMap>(
