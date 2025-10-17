@@ -13,5 +13,12 @@ export default async function handler(params: {
     ).lastInsertRowid
   );
 
+  console.log(videoPath);
+
+  Bun.spawn(["bun", "proc/remove-veo.ts", videoPath], {
+    stdout: "inherit",
+    stderr: "inherit",
+  });
+
   return { id };
 }

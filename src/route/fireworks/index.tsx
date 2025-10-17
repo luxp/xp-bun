@@ -96,8 +96,7 @@ export default function Fireworks() {
     try {
       const result = await uploadFile(file);
       setUploadedFile(file);
-      debugger;
-      form.setFieldValue("videoPath", result.url);
+      form.setFieldValue("videoPath", result.filePath);
       message.success("文件上传成功");
       return false; // 阻止默认上传行为
     } catch (error) {

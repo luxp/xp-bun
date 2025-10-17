@@ -28,7 +28,7 @@ export function callApi<T extends keyof typeof actionMap>(
   }).then((res) => res.json());
 }
 
-export function uploadFile(file: File): Promise<{ url: string }> {
+export function uploadFile(file: File): Promise<{ filePath: string }> {
   const formData = new FormData();
   formData.append("file", file);
 

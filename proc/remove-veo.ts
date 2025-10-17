@@ -1,8 +1,9 @@
+import { s3 } from "@/lib/s3";
 import {
-  createCanvas,
-  loadImage,
   Canvas,
   CanvasRenderingContext2D,
+  createCanvas,
+  loadImage,
 } from "canvas";
 import ffmpeg from "fluent-ffmpeg";
 import * as fs from "fs";
@@ -140,9 +141,26 @@ async function removeWatermark(
   onProgress?: (progress: ProgressInfo) => void
 ): Promise<string> {
   // 检查输入文件是否存在
-  if (!fs.existsSync(videoPath)) {
+  console.log(videoPath);
+  console.log(await s3.exists(videoPath));
+  if (!(await s3.file(videoPath).exists())) {
     throw new Error("输入视频文件不存在");
   }
+
+  // 使用 s3 下载 videoPath 到本地临时路径
+  const localVideoPath = "./temp.mp4";
+
+  if (!fs.existsSync(localVideoPath)) {
+    const downloadUrl = s3.presign(videoPath, {
+      expiresIn: 3600,
+    });
+    const response = await fetch(downloadUrl);
+    const data = await response.arrayBuffer();
+    fs.writeFileSync(localVideoPath, Buffer.from(data));
+  }
+
+  // 后续逻辑应使用 localVideoPath 作为输入
+  videoPath = localVideoPath;
 
   // 创建输出文件路径
   const outputPath = path.join(
@@ -341,28 +359,20 @@ function applyGaussianBlur(
   }
 }
 
-// 导出主要函数和类型
-// export { removeWatermark, processFrame, applyGaussianBlur };
-// export type { WatermarkConfig, ProgressInfo, VideoMetadata };
+console.log(process.argv.slice(2));
+const [videoPath] = process.argv.slice(2);
 
-// // 使用示例（仅在直接运行此文件时执行）
-// removeWatermark("./1017-2.mp4", (progress: ProgressInfo) => {
-//   const stage: string = progress.stage;
-//   const percent: number = Math.round(progress.progress * 100);
-//   console.log(`${stage}: ${percent}%`);
-// })
-//   .then((outputPath: string) => {
-//     console.log("处理完成，输出文件：", outputPath);
-//   })
-//   .catch((error: Error) => {
-//     console.error("处理失败：", error);
-//   });
-
-self.onmessage = async (event: MessageEvent) => {
-  if (!event.data) {
-    return;
-  }
-  const { videoPath } = event.data;
-  const outputPath = await removeWatermark(videoPath);
-  self.postMessage({ outputPath });
-};
+if (videoPath) {
+  const outputPath = await removeWatermark(
+    videoPath,
+    (progress: ProgressInfo) => {
+      console.log(progress.stage, progress.progress);
+    }
+  );
+  await s3.file(outputPath).write(fs.readFileSync(outputPath));
+  console.log("done");
+  process.exit(0);
+} else {
+  console.error("请提供视频路径");
+  process.exit(1);
+}
