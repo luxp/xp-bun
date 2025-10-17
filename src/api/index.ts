@@ -1,8 +1,11 @@
 import saveFireworks from "./actions/fireworks/save/index";
 import xpdb from "./actions/xpdb/index";
+import dbQuery from "./actions/dbQuery/index";
+
 const actionMap = {
   saveFireworks,
   xpdb,
+  dbQuery,
 };
 
 export async function handler(action: string, req: Request) {

@@ -3,8 +3,7 @@ export default function Fireworks() {
   return (
     <div
       onClick={async () => {
-        const res = await callApi("xpdb", {
-          action: "query",
+        const res = await callApi("dbQuery", {
           sql: "SELECT * FROM fireworks",
         });
         await callApi("xpdb", {
