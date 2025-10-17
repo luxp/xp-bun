@@ -1,10 +1,10 @@
 import "./index.css";
-import { callApi } from "./api/call";
+import Fireworks from "./route/fireworks";
 
 export function App() {
   return (
     <div className="app">
-      <button onClick={async () => {}}>adfafa</button>
+      <Fireworks />
     </div>
   );
 }

@@ -11,6 +11,11 @@ const server = serve({
       const action = req.params.action;
       return Response.json(await handler(action, req));
     },
+    "/api/:namespace/:action": async (req) => {
+      const namespace = req.params.namespace;
+      const action = req.params.action;
+      return Response.json(await handler(namespace + "/" + action, req));
+    },
   },
 
   development: process.env.NODE_ENV !== "production" && {

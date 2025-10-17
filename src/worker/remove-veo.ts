@@ -342,20 +342,27 @@ function applyGaussianBlur(
 }
 
 // 导出主要函数和类型
-export { removeWatermark, processFrame, applyGaussianBlur };
-export type { WatermarkConfig, ProgressInfo, VideoMetadata };
+// export { removeWatermark, processFrame, applyGaussianBlur };
+// export type { WatermarkConfig, ProgressInfo, VideoMetadata };
 
-// 使用示例（仅在直接运行此文件时执行）
-if (require.main === module) {
-  removeWatermark("./1016.mp4", (progress: ProgressInfo) => {
-    const stage: string = progress.stage;
-    const percent: number = Math.round(progress.progress * 100);
-    console.log(`${stage}: ${percent}%`);
-  })
-    .then((outputPath: string) => {
-      console.log("处理完成，输出文件：", outputPath);
-    })
-    .catch((error: Error) => {
-      console.error("处理失败：", error);
-    });
-}
+// // 使用示例（仅在直接运行此文件时执行）
+// removeWatermark("./1017-2.mp4", (progress: ProgressInfo) => {
+//   const stage: string = progress.stage;
+//   const percent: number = Math.round(progress.progress * 100);
+//   console.log(`${stage}: ${percent}%`);
+// })
+//   .then((outputPath: string) => {
+//     console.log("处理完成，输出文件：", outputPath);
+//   })
+//   .catch((error: Error) => {
+//     console.error("处理失败：", error);
+//   });
+
+self.onmessage = async (event: MessageEvent) => {
+  if (!event.data) {
+    return;
+  }
+  const { videoPath } = event.data;
+  const outputPath = await removeWatermark(videoPath);
+  self.postMessage({ outputPath });
+};

@@ -1,0 +1,119 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Bun: Start Dev Server",
+            "type": "shell",
+            "command": "bun",
+            "args": [
+                "--hot",
+                "src/index.tsx"
+            ],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "isBackground": true,
+            "problemMatcher": {
+                "owner": "bun",
+                "pattern": {
+                    "regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
+                    "file": 1,
+                    "line": 2,
+                    "column": 3,
+                    "severity": 4,
+                    "message": 5
+                },
+                "background": {
+                    "activeOnStart": true,
+                    "beginsPattern": "^.*Server running at.*$",
+                    "endsPattern": "^.*Server running at.*$"
+                }
+            }
+        },
+        {
+            "label": "Bun: Start Debug Server",
+            "type": "shell",
+            "command": "bun",
+            "args": [
+                "--inspect",
+                "--hot",
+                "src/index.tsx"
+            ],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "isBackground": true,
+            "problemMatcher": {
+                "owner": "bun",
+                "pattern": {
+                    "regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
+                    "file": 1,
+                    "line": 2,
+                    "column": 3,
+                    "severity": 4,
+                    "message": 5
+                },
+                "background": {
+                    "activeOnStart": true,
+                    "beginsPattern": "^.*Debugger listening on.*$",
+                    "endsPattern": "^.*Server running at.*$"
+                }
+            }
+        },
+        {
+            "label": "Bun: Build",
+            "type": "shell",
+            "command": "bun",
+            "args": [
+                "build",
+                "./src/index.html",
+                "--outdir=dist",
+                "--sourcemap",
+                "--target=browser",
+                "--minify",
+                "--define:process.env.NODE_ENV='\"production\"'",
+                "--env='BUN_PUBLIC_*'"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "problemMatcher": [
+                "$tsc"
+            ]
+        },
+        {
+            "label": "Bun: Test",
+            "type": "shell",
+            "command": "bun",
+            "args": [
+                "test"
+            ],
+            "group": "test",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            }
+        }
+    ]
+}
