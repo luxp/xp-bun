@@ -369,7 +369,10 @@ if (videoPath) {
       console.log(progress.stage, progress.progress);
     }
   );
-  await s3.file(outputPath).write(fs.readFileSync(outputPath));
+  await s3.file(videoPath.replace(".mp4", "_no_watermark.mp4")).write(
+    fs.readFileSync(outputPath)
+  );
+  fs.unlinkSync(outputPath);
   console.log("done");
   process.exit(0);
 } else {
