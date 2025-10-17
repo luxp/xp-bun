@@ -25,9 +25,6 @@
     "paths": {
       "@/*": [
         "./src/*"
-      ],
-      "@worker/*": [
-        "cmd/*"
       ]
     },
     // Some stricter flags (disabled by default)
