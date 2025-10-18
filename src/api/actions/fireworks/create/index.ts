@@ -39,7 +39,6 @@ export default async function handler(params: {
     await uploadFileToS3({
       localFilePath: nowaterMarkVideoPath,
       s3FilePath: nowaterMarkS3Path,
-      s3Folder: "videos",
     });
     await xpDB.run(
       `UPDATE fireworks SET videoPathNoWatermark = ? WHERE id = ?`,
