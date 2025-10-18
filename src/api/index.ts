@@ -32,7 +32,7 @@ export async function handler(action: string, req: Request) {
 
   // 如果是上传接口，处理 FormData
   if (action === "upload") {
-    return handler({ body: await req.formData() });
+    return upload({ body: await req.formData() });
   }
 
   return handler({ body: await req.json() });
