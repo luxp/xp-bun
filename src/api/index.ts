@@ -4,6 +4,7 @@ import deleteFireworks from "./actions/fireworks/delete/index";
 import listFireworks from "./actions/fireworks/list/index";
 import saveFireworks from "./actions/fireworks/save/index";
 import updateFireworks from "./actions/fireworks/update/index";
+import restart from "./actions/restart/index";
 import upload from "./actions/upload/index";
 import xpdb from "./actions/xpdb/index";
 
@@ -17,10 +18,12 @@ const actionMap = {
   saveFireworks,
   xpdb,
   dbQuery,
+  restart,
 };
 
 export async function handler(action: string, req: Request) {
   const handler = actionMap[action as keyof typeof actionMap];
+
   if (!handler) {
     return Response.json(
       {
@@ -35,5 +38,11 @@ export async function handler(action: string, req: Request) {
     return upload({ body: await req.formData() });
   }
 
-  return handler({ body: await req.json() });
+  console.log(action);
+
+  if (req.method === "GET") {
+    return handler({} as any);
+  } else if (req.method === "POST") {
+    return handler({ body: await req.json() });
+  }
 }
