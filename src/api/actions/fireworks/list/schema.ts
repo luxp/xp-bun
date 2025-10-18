@@ -13,6 +13,8 @@ const outputSchema = z.object({
       aiModel: z.string().nullable(),
       videoPath: z.string().nullable(),
       videoPathNoWatermark: z.string().nullable(),
+      publicVideoPath: z.string().nullable(),
+      publicVideoPathNoWatermark: z.string().nullable(),
       createAt: z.string(),
     })
   ),

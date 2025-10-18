@@ -1,7 +1,9 @@
 import { callApi, uploadFile } from "@/api/call";
 import {
   DeleteOutlined,
+  DownloadOutlined,
   EditOutlined,
+  EyeOutlined,
   PlusOutlined,
   RocketOutlined,
   UploadOutlined,
@@ -28,6 +30,9 @@ interface FireworksItem {
   prompt: string | null;
   aiModel: string | null;
   videoPath: string | null;
+  videoPathNoWatermark: string | null;
+  publicVideoPath: string | null;
+  publicVideoPathNoWatermark: string | null;
   createAt: string;
 }
 
@@ -45,6 +50,9 @@ export default function Fireworks() {
   const [generating, setGenerating] = useState(false);
   const [generateModalVisible, setGenerateModalVisible] = useState(false);
   const [generateForm] = Form.useForm();
+  const [previewModalVisible, setPreviewModalVisible] = useState(false);
+  const [previewVideoUrl, setPreviewVideoUrl] = useState("");
+  const [previewVideoName, setPreviewVideoName] = useState("");
 
   // 加载数据
   const loadData = async (page = 1, size = 10) => {
@@ -189,6 +197,44 @@ export default function Fireworks() {
     }
   };
 
+  // 打开视频预览
+  const openVideoPreview = (record: FireworksItem) => {
+    const previewUrl =
+      record.publicVideoPathNoWatermark || record.publicVideoPath;
+    if (!previewUrl) {
+      message.warning("视频路径为空");
+      return;
+    }
+
+    const fileName =
+      (record.videoPathNoWatermark || record.videoPath)?.split("/").pop() ||
+      "video";
+
+    setPreviewVideoUrl(previewUrl);
+    setPreviewVideoName(fileName);
+    setPreviewModalVisible(true);
+  };
+
+  // 关闭视频预览
+  const closeVideoPreview = () => {
+    setPreviewModalVisible(false);
+    setPreviewVideoUrl("");
+    setPreviewVideoName("");
+  };
+
+  // 下载视频
+  const handleDownloadVideo = () => {
+    if (!previewVideoUrl) return;
+
+    const link = document.createElement("a");
+    link.href = previewVideoUrl;
+    link.download = previewVideoName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    message.success("开始下载视频");
+  };
+
   const columns = [
     {
       title: "ID",
@@ -214,7 +260,26 @@ export default function Fireworks() {
       dataIndex: "videoPath",
       key: "videoPath",
       ellipsis: true,
-      render: (text: string) => text || "-",
+      render: (text: string, record: FireworksItem) => {
+        if (!text) return "-";
+
+        return (
+          <Space>
+            <Button
+              type="link"
+              size="small"
+              onClick={() => openVideoPreview(record)}
+              icon={<EyeOutlined />}
+              style={{ padding: 0, height: "auto" }}
+            >
+              预览
+            </Button>
+            <span style={{ color: "#1890ff", cursor: "pointer" }} title={text}>
+              {text.length > 30 ? `${text.substring(0, 30)}...` : text}
+            </span>
+          </Space>
+        );
+      },
     },
     {
       title: "创建时间",
@@ -401,6 +466,56 @@ export default function Fireworks() {
             <Input placeholder="请输入AI模型，如：veo-2, veo-3.1-fast" />
           </Form.Item>
         </Form>
+      </Modal>
+
+      {/* 视频预览弹窗 */}
+      <Modal
+        title={`视频预览 - ${previewVideoName}`}
+        open={previewModalVisible}
+        onCancel={closeVideoPreview}
+        width={800}
+        footer={[
+          <Button
+            key="download"
+            type="primary"
+            icon={<DownloadOutlined />}
+            onClick={() => {
+              handleDownloadVideo();
+            }}
+          >
+            下载视频
+          </Button>,
+          <Button key="close" onClick={closeVideoPreview}>
+            关闭
+          </Button>,
+        ]}
+      >
+        {previewVideoUrl && (
+          <div style={{ textAlign: "center" }}>
+            <video
+              controls
+              key={previewVideoUrl}
+              style={{ width: "100%", maxHeight: "500px" }}
+              preload="metadata"
+            >
+              <source src={previewVideoUrl} type="video/mp4" />
+              您的浏览器不支持视频播放。
+            </video>
+            <div style={{ marginTop: "16px", color: "#666" }}>
+              <p>视频文件: {previewVideoName}</p>
+              <p>
+                预览地址:{" "}
+                <a
+                  href={previewVideoUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {previewVideoUrl}
+                </a>
+              </p>
+            </div>
+          </div>
+        )}
       </Modal>
     </div>
   );

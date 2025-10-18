@@ -1,3 +1,4 @@
+import { getPublicUrl } from "@/lib/s3";
 import { xpDB } from "@/lib/sqlite";
 import * as z from "zod";
 import schema from "./schema";
@@ -33,5 +34,16 @@ export default async function handler(params: {
     createAt: string;
   }>;
 
-  return { data, total };
+  return {
+    data: data.map((item) => {
+      return {
+        publicVideoPath: item.videoPath ? getPublicUrl(item.videoPath) : null,
+        publicVideoPathNoWatermark: item.videoPathNoWatermark
+          ? getPublicUrl(item.videoPathNoWatermark)
+          : null,
+        ...item,
+      };
+    }),
+    total,
+  };
 }

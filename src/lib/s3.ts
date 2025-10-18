@@ -39,3 +39,9 @@ export async function uploadFileToS3(params: {
     throw new Error("文件上传失败");
   }
 }
+
+export function getPublicUrl(s3Path: string): string {
+  return s3.presign(s3Path, {
+    expiresIn: 3600,
+  });
+}
