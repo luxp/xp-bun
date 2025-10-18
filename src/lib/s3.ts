@@ -18,14 +18,14 @@ function generateS3FilePath(localFilePath: string) {
 
 export async function uploadFileToS3(params: {
   localFilePath: string;
-  s3Folder: string;
+  s3Folder?: string;
   s3FilePath?: string;
 }) {
   let { localFilePath, s3FilePath, s3Folder } = params;
   s3FilePath = s3FilePath || generateS3FilePath(localFilePath);
   // 生成唯一的文件名
 
-  const s3Path = `${s3Folder}/${s3FilePath}`;
+  const s3Path = s3Folder ? `${s3Folder}/${s3FilePath}` : s3FilePath;
 
   try {
     // 使用 S3Client 的 write 方法上传文件
