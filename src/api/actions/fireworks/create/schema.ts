@@ -1,11 +1,12 @@
 import * as z from "zod";
 
 const inputSchema = z.object({
-  name: z.string(),
+  prompt: z.string(),
+  aiModel: z.string(),
 });
 
 const outputSchema = z.object({
-  message2: z.string(),
+  id: z.number(),
 });
 
 export default {

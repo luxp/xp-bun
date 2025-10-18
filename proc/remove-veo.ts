@@ -1,4 +1,5 @@
 import { s3 } from "@/lib/s3";
+import { getTempPath } from "@/utils";
 import {
   Canvas,
   CanvasRenderingContext2D,
@@ -8,6 +9,7 @@ import {
 import ffmpeg from "fluent-ffmpeg";
 import * as fs from "fs";
 import * as path from "path";
+import { getArgs } from "./utils";
 // 移除 worker_threads 和 os 导入，改为单线程执行
 
 // 类型定义
@@ -136,45 +138,38 @@ async function processFrame(
  * @param onProgress - 进度回调函数，参数为进度对象 { stage: string, progress: number }
  * @returns 返回处理后的视频路径
  */
-async function removeWatermark(
-  videoPath: string,
-  onProgress?: (progress: ProgressInfo) => void
-): Promise<string> {
+async function removeWatermark(params: {
+  s3VideoPath: string;
+  outputPath: string;
+  onProgress?: (progress: ProgressInfo) => void;
+}): Promise<string> {
+  let { s3VideoPath, outputPath, onProgress } = params;
   // 检查输入文件是否存在
-  console.log(videoPath);
-  console.log(await s3.exists(videoPath));
-  if (!(await s3.file(videoPath).exists())) {
+  console.log(await s3.exists(s3VideoPath));
+  if (!(await s3.file(s3VideoPath).exists())) {
     throw new Error("输入视频文件不存在");
   }
 
   // 使用 s3 下载 videoPath 到本地临时路径
-  const localVideoPath = "./temp.mp4";
+  const localVideoPath = getTempPath(s3VideoPath);
 
   if (!fs.existsSync(localVideoPath)) {
-    const downloadUrl = s3.presign(videoPath, {
+    const downloadUrl = s3.presign(s3VideoPath, {
       expiresIn: 3600,
     });
     const response = await fetch(downloadUrl);
     const data = await response.arrayBuffer();
+    fs.mkdirSync(path.dirname(localVideoPath), { recursive: true });
     fs.writeFileSync(localVideoPath, Buffer.from(data));
   }
 
   // 后续逻辑应使用 localVideoPath 作为输入
-  videoPath = localVideoPath;
-
-  // 创建输出文件路径
-  const outputPath = path.join(
-    path.dirname(videoPath),
-    `${path.basename(
-      videoPath,
-      path.extname(videoPath)
-    )}_no_watermark${path.extname(videoPath)}`
-  );
+  let videoPath = localVideoPath;
 
   // 创建临时目录用于存储处理后的帧
   const tempDir = path.join(path.dirname(videoPath), "temp_frames");
   if (!fs.existsSync(tempDir)) {
-    fs.mkdirSync(tempDir);
+    fs.mkdirSync(tempDir, { recursive: true });
   }
 
   return new Promise<string>((resolve, reject) => {
@@ -360,22 +355,16 @@ function applyGaussianBlur(
   }
 }
 
-console.log(process.argv.slice(2));
-const [videoPath] = process.argv.slice(2);
+const { s3VideoPath, outputPath } = getArgs();
 
-if (videoPath) {
-  const outputPath = await removeWatermark(
-    videoPath,
-    (progress: ProgressInfo) => {
+if (s3VideoPath) {
+  await removeWatermark({
+    s3VideoPath,
+    outputPath,
+    onProgress: (progress: ProgressInfo) => {
       console.log(progress.stage, progress.progress);
-    }
-  );
-  await s3
-    .file(videoPath.replace(".mp4", "_no_watermark.mp4"))
-    .write(fs.readFileSync(outputPath));
-  fs.rmSync(outputPath);
-  console.log("done");
-  process.exit(0);
+    },
+  });
 } else {
   console.error("请提供视频路径");
   process.exit(1);

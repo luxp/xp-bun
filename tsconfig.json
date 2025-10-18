@@ -25,6 +25,9 @@
     "paths": {
       "@/*": [
         "./src/*"
+      ],
+      "@proc/*": [
+        "./proc/*"
       ]
     },
     // Some stricter flags (disabled by default)
