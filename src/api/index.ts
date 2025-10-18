@@ -1,4 +1,5 @@
 import dbQuery from "./actions/dbQuery/index";
+import createFireworks from "./actions/fireworks/create/index";
 import deleteFireworks from "./actions/fireworks/delete/index";
 import listFireworks from "./actions/fireworks/list/index";
 import saveFireworks from "./actions/fireworks/save/index";
@@ -7,6 +8,7 @@ import upload from "./actions/upload/index";
 import xpdb from "./actions/xpdb/index";
 
 const actionMap = {
+  "fireworks/create": createFireworks,
   "fireworks/save": saveFireworks,
   "fireworks/list": listFireworks,
   "fireworks/update": updateFireworks,

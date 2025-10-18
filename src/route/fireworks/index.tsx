@@ -3,6 +3,7 @@ import {
   DeleteOutlined,
   EditOutlined,
   PlusOutlined,
+  RocketOutlined,
   UploadOutlined,
 } from "@ant-design/icons";
 import {
@@ -41,6 +42,9 @@ export default function Fireworks() {
   const [form] = Form.useForm();
   const [uploading, setUploading] = useState(false);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [generating, setGenerating] = useState(false);
+  const [generateModalVisible, setGenerateModalVisible] = useState(false);
+  const [generateForm] = Form.useForm();
 
   // 加载数据
   const loadData = async (page = 1, size = 10) => {
@@ -147,6 +151,44 @@ export default function Fireworks() {
     }
   };
 
+  // 打开生成烟花弹窗
+  const openGenerateModal = () => {
+    setGenerateModalVisible(true);
+    generateForm.resetFields();
+  };
+
+  // 关闭生成烟花弹窗
+  const closeGenerateModal = () => {
+    setGenerateModalVisible(false);
+    generateForm.resetFields();
+  };
+
+  // 生成烟花
+  const handleGenerate = async () => {
+    try {
+      const values = await generateForm.validateFields();
+      setGenerating(true);
+
+      const result = await callApi("fireworks/create", {
+        prompt: values.prompt,
+        aiModel: values.aiModel || "veo-2",
+      });
+
+      message.success("烟花生成任务已启动，请稍后查看结果");
+      closeGenerateModal();
+      loadData(current, pageSize);
+    } catch (error: any) {
+      if (error?.errorFields) {
+        // 表单验证错误
+        return;
+      }
+      message.error("生成烟花失败");
+      console.error(error);
+    } finally {
+      setGenerating(false);
+    }
+  };
+
   const columns = [
     {
       title: "ID",
@@ -221,13 +263,24 @@ export default function Fireworks() {
           <Title level={3} style={{ margin: 0 }}>
             Fireworks 管理
           </Title>
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={() => openModal()}
-          >
-            新增
-          </Button>
+          <Space>
+            <Button
+              type="primary"
+              icon={<RocketOutlined />}
+              onClick={openGenerateModal}
+              loading={generating}
+              disabled={generating}
+            >
+              生成烟花
+            </Button>
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={() => openModal()}
+            >
+              新增
+            </Button>
+          </Space>
         </div>
 
         <Table
@@ -307,6 +360,45 @@ export default function Fireworks() {
                 已上传: {uploadedFile.name}
               </div>
             )}
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      {/* 生成烟花弹窗 */}
+      <Modal
+        title="生成烟花"
+        open={generateModalVisible}
+        onOk={handleGenerate}
+        onCancel={closeGenerateModal}
+        confirmLoading={generating}
+        width={600}
+      >
+        <Form
+          form={generateForm}
+          layout="vertical"
+          initialValues={{
+            prompt:
+              "生成美丽的烟花视频，期望有多次的爆炸，注意烟花要和现实中的一样，不要看着像假的",
+            aiModel: "veo-2",
+          }}
+        >
+          <Form.Item
+            label="提示词"
+            name="prompt"
+            rules={[{ required: true, message: "请输入提示词" }]}
+          >
+            <Input.TextArea
+              rows={4}
+              placeholder="请描述您想要的烟花效果，例如：生成美丽的烟花视频，期望有多次的爆炸，注意烟花要和现实中的一样，不要看着像假的"
+            />
+          </Form.Item>
+
+          <Form.Item
+            label="AI模型"
+            name="aiModel"
+            rules={[{ required: true, message: "请选择AI模型" }]}
+          >
+            <Input placeholder="请输入AI模型，如：veo-2, veo-3.1-fast" />
           </Form.Item>
         </Form>
       </Modal>

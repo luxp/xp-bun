@@ -6,6 +6,8 @@ export async function spawnProc(
 ) {
   const proc = Bun.spawn(
     [
+      "bun",
+      "run",
       path.resolve(import.meta.dirname, `${command}.ts`),
       ...Object.entries(args).map(([key, value]) => `--${key}=${value}`),
     ],

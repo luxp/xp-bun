@@ -1,6 +1,9 @@
 const API_KEY = "AIzaSyBYl6rbjC9bpNsdwYZHrmz1htCU2LxBsrY";
+import fs from "fs";
 
+import { autoRetry } from "@/utils";
 import { GoogleGenAI } from "@google/genai";
+import path from "path";
 
 const ai = new GoogleGenAI({
   apiKey: API_KEY,
@@ -20,25 +23,51 @@ export async function generateVideo(params: {
   let operation = await ai.models.generateVideos({
     model,
     prompt,
+    config: {
+      durationSeconds: 8,
+    },
   });
 
+  console.log("start polling");
+  //   let operation: any = {
+  //     name: "models/veo-3.1-fast-generate-preview/operations/1c1viaip0xqx",
+  //   };
   // Poll the operation status until the video is ready.
   while (!operation.done) {
     console.log("Waiting for video generation to complete...");
     await new Promise((resolve) => setTimeout(resolve, 10000));
-    operation = await ai.operations.getVideosOperation({
-      operation: operation,
-    });
+    console.log(JSON.stringify(operation));
+    try {
+      operation = await ai.operations.getVideosOperation({
+        operation: operation,
+      });
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   }
 
-  if (!operation.response?.generatedVideos?.[0]?.video) {
+  const videoGenerated = operation.response?.generatedVideos?.[0]?.video;
+
+  if (!videoGenerated) {
     throw new Error("No video generated");
   }
-  // Download the generated video.
-  await ai.files.download({
-    file: operation.response.generatedVideos[0].video,
-    downloadPath,
-  });
+
+  console.log(videoGenerated);
+
+  fs.mkdirSync(path.dirname(downloadPath), { recursive: true });
+
+  await autoRetry(
+    async () => {
+      // Download the generated video.
+      await ai.files.download({
+        file: videoGenerated,
+        downloadPath,
+      });
+    },
+    5,
+    1000
+  );
 
   return downloadPath;
 }

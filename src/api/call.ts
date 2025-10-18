@@ -1,5 +1,6 @@
 import * as z from "zod";
 import dbQuery from "./actions/dbQuery/schema";
+import createFireworks from "./actions/fireworks/create/schema";
 import deleteFireworks from "./actions/fireworks/delete/schema";
 import listFireworks from "./actions/fireworks/list/schema";
 import saveFireworks from "./actions/fireworks/save/schema";
@@ -8,6 +9,7 @@ import upload from "./actions/upload/schema";
 import xpdb from "./actions/xpdb/schema";
 
 const actionMap = {
+  "fireworks/create": createFireworks,
   "fireworks/save": saveFireworks,
   "fireworks/list": listFireworks,
   "fireworks/update": updateFireworks,
