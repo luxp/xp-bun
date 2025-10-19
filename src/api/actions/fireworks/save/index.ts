@@ -1,3 +1,4 @@
+import { uploadFileToS3 } from "@/lib/s3";
 import { xpDB } from "@/lib/sqlite";
 import { getTempPath } from "@/utils";
 import { spawnProc } from "@proc/index";
@@ -16,14 +17,19 @@ export default async function handler(params: {
     ).lastInsertRowid
   );
 
+  const nowaterMarkVideoPath = getTempPath(`${id}_no_watermark.mp4`);
   spawnProc("remove-veo", {
     s3VideoPath: videoPath,
-    outputPath: getTempPath(`${id}_no_watermark.mp4`),
+    outputPath: nowaterMarkVideoPath,
   }).then(async () => {
     const nowaterMarkS3Path = `${videoPath.replace(
       ".mp4",
       "_no_watermark.mp4"
     )}`;
+    await uploadFileToS3({
+      localFilePath: nowaterMarkVideoPath,
+      s3FilePath: nowaterMarkS3Path,
+    });
     await xpDB.run(
       `UPDATE fireworks SET videoPathNoWatermark = ? WHERE id = ?`,
       [nowaterMarkS3Path, id]
