@@ -14,6 +14,8 @@ export async function generateVideo(params: {
   downloadPath: string;
   model?: "veo-3.1-fast-generate-preview";
 }) {
+  // 下面的 API 巨贵，token 会被重复计算
+  return;
   const {
     prompt,
     model = "veo-3.1-fast-generate-preview",
