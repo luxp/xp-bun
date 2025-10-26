@@ -167,7 +167,10 @@ async function removeWatermark(params: {
   let videoPath = localVideoPath;
 
   // 创建临时目录用于存储处理后的帧
-  const tempDir = path.join(path.dirname(videoPath), "temp_frames");
+  const tempDir = path.join(
+    path.dirname(videoPath),
+    `temp_frames_${s3VideoPath.replace(".mp4", "").replace("/", "_")}`
+  );
   if (!fs.existsSync(tempDir)) {
     fs.mkdirSync(tempDir, { recursive: true });
   }
